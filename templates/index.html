@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PDF to Excel Conversion</title>
+  <link rel="icon" href="icono.svg" type="image/svg+xml">
+  <link rel="icon" href="{{ url_for('static', filename='images/icono.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <h1> <span style="color: #B0190C;" ><br>PDF </br></span>  to <span style="color: #10AD28;">Excel</span></h1>
+  <div class="container-btn" style="padding-bottom: 25px;">
+     
+    <button class="btn" onclick="startConversion()">Start Conversion</button>
+
+  </div>
+  
+    <div style="display: flex; flex-direction:row; align-items: center; gap: 10px;">
+        <div style="width:300px; border:1px solid #000;">
+          <div id="bar" style="background:green; height:30px; width:0%; color:white; text-align:center;"></div>
+        </div>
+        <div id="barNumber">0%</div>
+
+    </div>
+
+  <script>
+    function startConversion() {
+      // Start conversion in backend
+      const button = document.querySelector(".btn");
+
+      button.disabled = true;
+      button.textContent = "Converting...";
+
+      window.location.href = "/convert";
+
+      // Poll progress every second
+      let interval = setInterval(() => {
+        fetch("/progress")
+          .then(resp => resp.json())
+          .then(data => {
+            if (data.total > 0) {
+              let percent = Math.round((data.page / data.total) * 100);
+              document.getElementById("bar").style.width = percent + "%";
+              document.getElementById("barNumber").innerText = percent + "%";
+              if (percent >= 100) {
+                clearInterval(interval);
+                button.disabled = false;
+                button.textContent = "Start Conversion";
+              }
+            }
+          })
+          .catch(error => {
+            console.error("Error fetching progress:", error);
+          });
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

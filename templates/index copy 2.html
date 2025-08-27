@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PDF to Excel Conversion</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <h1> <span style="color: #B0190C;" ><br>PDF </br></span>  to <span style="color: #10AD28;">Excel</span></h1>
+  <div class="container-btn" style="padding-bottom: 25px;">
+     
+    <button class="btn" onclick="startConversion()">Start Conversion</button>
+
+  </div>
+  
+    <div style="display: flex; flex-direction:row; align-items: center; gap: 10px;">
+        <div style="width:300px; border:1px solid #000;">
+          <div id="bar" style="background:green; height:30px; width:0%; color:white; text-align:center;"></div>
+        </div>
+        <div id="barNumber">0%</div>
+
+    </div>
+
+  <script>
+    
+    async function startConversion() {
+      // Start conversion in backend
+      const button = document.querySelector(".btn");
+
+      button.disabled = true;
+      button.textContent = "Converting..."
+
+      window.location.href = "/convert";
+
+
+      // Poll progress every second
+      let interval = setInterval(async () => {
+        let resp = await fetch("/progress");
+        let data = await resp.json();
+        if (data.total > 0) {
+          let percent = Math.round((data.page / data.total) * 100);
+          document.getElementById("bar").style.width = percent + "%";
+          document.getElementById("barNumber").innerText = percent + "%";
+          if (percent >= 100) {
+            clearInterval(interval);
+            button.disabled = false;
+            button.textContent = "Start Conversion";
+          }
+        }
+      }, 1000);
+    }
+    
+    
+  </script>
+</body>
+</html>
